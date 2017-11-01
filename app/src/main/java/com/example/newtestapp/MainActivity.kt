@@ -33,13 +33,18 @@ class MainActivity : AppCompatActivity() {
             override fun onClick(v: View?) {
                 data.name = etName.text.toString()
                 val dataStream = Observable.just(data)
-                dataStream.subscribeOn(Schedulers.io()).subscribe({
-                    data -> AppDb.getInstance(this@MainActivity).getDao().insert(data)
-                    getDataFromDb()
+                dataStream
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe({
+                    data ->
+                            AppDb.getInstance(this@MainActivity).getDao().insert(data)
+                            Toast.makeText(this@MainActivity, "Data added", Toast.LENGTH_SHORT).show()
+                            clearEditText()
+                            getDataFromDb()
                 }, {
-                    error -> Toast.makeText(this@MainActivity, "cannot insert data", Toast.LENGTH_SHORT).show()
+                    error -> Toast.makeText(this@MainActivity, "Cannot insert data", Toast.LENGTH_SHORT).show()
                 })
-                clearEditText()
             }
         })
     }
@@ -68,6 +73,22 @@ class MainActivity : AppCompatActivity() {
         return object : BaseViewHolder<Data>(view){
             override fun onBind(data: Data) {
                 view.tvName.text = data.name
+                view.ivDelete.setOnClickListener(object : View.OnClickListener{
+                    override fun onClick(v: View?) {
+                        val dataStream = Observable.just(data)
+                        dataStream
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe({
+                            data ->
+                                    AppDb.getInstance(this@MainActivity).getDao().delete(data)
+                                    Toast.makeText(this@MainActivity, "Data deleted", Toast.LENGTH_SHORT).show()
+                                    getDataFromDb()
+                        }, {
+                            error -> Toast.makeText(this@MainActivity, "Cannot delete data", Toast.LENGTH_SHORT).show()
+                        })
+                    }
+                })
             }
 
         }

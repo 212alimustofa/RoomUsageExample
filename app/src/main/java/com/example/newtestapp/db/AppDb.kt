@@ -15,7 +15,7 @@ abstract class AppDb: RoomDatabase(){
     companion object {
         val DB_NAME = "app.db"
         fun getInstance(context: Context): AppDb {
-            return Room.databaseBuilder(context, AppDb::class.java, DB_NAME).build()
+            return Room.databaseBuilder(context, AppDb::class.java, DB_NAME).allowMainThreadQueries().build()
         }
     }
 
